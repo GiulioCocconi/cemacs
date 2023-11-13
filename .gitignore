@@ -1,0 +1,9 @@
+elpa/
+transient/
+#!*
+auto-save-list/
+backups/
+eln-cache/
+games/
+recentf/
+savehist/
