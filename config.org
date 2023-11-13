@@ -1,0 +1,433 @@
+#+TITLE: CogiSystems Emacs config
+#+AUTHOR: Giulio Cocconi
+#+EMAIL: coccogiulio8@gmail.com
+
+#+STARTUP: overview
+
+* Utils
+Here there are some misc utils (functions or vars).
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (defconst IS-MAC      (eq system-type 'darwin))
+  (defconst IS-LINUX    (memq system-type '(gnu gnu/linux gnu/kfreebsd berkeley-unix)))
+  (defconst IS-WINDOWS  (memq system-type '(cygwin windows-nt ms-dos)))
+
+  (defconst IS-NIX (getenv "NIX_EMACS")
+    "If non-nil then consider emacs as configured by Nix Emacs Overlay")
+
+  (defvar language-list nil
+    "The list of programming languages supported by this config that are manually managed  (if `IS-NIX' is non-nil then you can, and actually should, manage your programming languages with nix)")
+
+  (when IS-NIX
+    (defvar is-nix-pure t
+      "True if (and only if) using a pure config"))
+
+  (defun is-language-active (lang)
+    (or (and IS-NIX
+	     (or (getenv (concat "NIX_LANG_" (upcase lang)))
+		 (string-equal lang "nix")))
+	(member lang language-list)))
+
+  (defun add-multiple-hooks (hooks fun)
+    "Add function to multiple hooks"
+    (dolist (hook hooks)
+      (add-hook hook fun)))
+#+end_src
+
+* Startup
+Some ideas are stealed from https://git.sr.ht/~knazarov/nixos/tree/master/item/emacs.el.
+
+** GC
+Prevent aggressive garbage collecting by increasing the threshold temporarily, restoring it at the end.
+
+#+BEGIN_SRC emacs-lisp :tangle emacs.d/early-init.el
+  (setq gc-cons-threshold 402653184
+	gc-cons-percentage 0.6)
+#+END_SRC
+
+** Disable unnecessary things
+Disable unnecessary ways to handle files during startup.
+
+#+BEGIN_SRC emacs-lisp :tangle emacs.d/early-init.el
+  (defvar saved--file-name-handler-alist file-name-handler-alist)
+  (setq file-name-handler-alist nil)
+#+END_SRC
+
+** Restore defaults
+You have to restore the defaults after the init.
+
+#+begin_src emacs-lisp :tangle emacs.d/early-init.el
+  (add-hook 'after-init-hook #'(lambda ()
+				 (setq gc-cons-threshold 16777216
+				       gc-cons-percentage 0.1)
+				 (setq file-name-handler-alist saved--file-name-handler-alist)))
+#+end_src
+
+** ~user-emacs-directory~
+This config aims to be reproducible whilst being usable on all major operating systems. When using the ~CoGiSystems~ config for NixOS one has two option to launch Emacs:
+1) Using the command ~cemacs~: This config repository is pulled from GH as the flake input and copied over ~/etc/emacs.d~, that becomes the ~user-emacs-directory~. When the config is loaded, however, this variable should be setted to ~$HOME/.emacs.d~ in order to avoid write permission errors.
+2) Using the command ~emacs~: everything works normally. That's useful when testing some features that aren't already in the git repo. However the user should be warned that this config is not reproducible.
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (when IS-NIX
+    (if (string= user-emacs-directory "/etc/emacs.d/")
+	(setq user-emacs-directory "~/emacs.d/")
+      (progn
+	(message "Warning! Using an impure config in Nix!")
+	(setq is-nix-pure nil))))
+#+end_src
+
+** Windows
+Set ~HOME~ environment variable when on Windows.
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (when (and IS-WINDOWS
+	     (null (getenv "HOME")))
+    (setenv "HOME" (getenv "USERPROFILE")))
+#+end_src
+
+* Packages setup
+If the config isn't managed by Nix then download Melpa, Elpa and Org archives. If it's using Nix then packages should be managed by emacs-overlay's ~emacsWithPackagesFromUsePackage~ (see https://github.com/nix-community/emacs-overlay).
+
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (unless (and IS-NIX is-nix-pure)
+    (require 'package)
+
+    (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+			     ("org" . "https://orgmode.org/elpa/")
+			     ("elpa" . "https://elpa.gnu.org/packages/")))
+
+    (package-initialize)
+    (unless package-archive-contents
+      (package-refresh-contents)))
+#+end_src
+
+Ensure that ~use-package~ is actually installed, then require it:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (unless (package-installed-p 'use-package)
+    (package-install 'use-package))
+  (require 'use-package)
+#+end_src
+
+More configuration has to be done when not managed by Nix, in particular package should be always ensured and AOT compilation should be enabled.
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (unless (and IS-NIX is-nix-pure)
+    (setq package-native-compile t
+	  use-package-always-ensure t))
+#+end_src
+
+* State files
+** Recent files
+From [[https://www.emacswiki.org/emacs/RecentFiles][Emacs Wiki]]:
+==Recentf is a minor mode that builds a list of recently opened files. This list is automatically saved across sessions on exiting Emacs - you can then access this list through a command or the menu.==
+
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (setq recentf-save-file "~/.emacs.d/recentf"
+	recentf-filename-handlers '(file-truename)
+	recentf-exclude (list "^/tmp/"))
+  (recentf-mode 1)
+#+end_src
+
+** Backup files
+From [[https://www.emacswiki.org/emacs/BackupDirectory][Emacs Wiki]]:
+==By default Emacs saves BackupFiles under the original name with a tilde `~’ appended [...] This is primitive and boring.==
+
+Let's fix that by placing all Backup Files in the temp directory (which is ~/tmp~ on Linux and ~/Temp~ on Windows)
+
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (setq backup-directory-alist
+	`((".*" . ,temporary-file-directory)))
+  (setq auto-save-file-name-transforms
+	`((".*" ,temporary-file-directory t)))
+#+end_src
+
+* Appearence
+** Disable GUI and bloat
+#+begin_src emacs-lisp  :tangle emacs.d/init.el
+  (setq inhibit-startup-screen  t
+	inhibit-startup-message t
+	visible-bell            nil)
+
+  (scroll-bar-mode -1)
+  (tool-bar-mode   -1)
+  (tooltip-mode    -1)
+  (menu-bar-mode   -1)
+#+end_src
+
+** Set CoGiSystems scratch message
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (setq initial-scratch-message (purecopy "\
+  ;; CoGiSystems emacs
+  ;; Remember to have fun :)
+
+  "))
+#+end_src
+
+** Line numbers
+Use relative line numbers:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (setq display-line-numbers-type 'relative)
+#+end_src
+
+They should be active when in ~prog-mode~:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+#+end_src
+
+** Tiling WM
+Emacs will, by default, size its window by charactes, since this usually doesn't fit to an exact pixel size, it might cause Tiling WMs to display unnecessary gaps. Let's fix it!
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (setq frame-resize-pixelwise t)
+#+end_src
+
+** Highlighters
+*** hl-todo
+Use ~hl-todo~ to highlight certain comment's tags, enable it in ~prog-mode~ and ~org-mode~.
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package hl-todo
+    :hook ((prog-mode org-mode) . hl-todo-mode))
+#+end_src
+
+*** highlight-numbers
+Use ~highlight-numbers~ to highlight numbers literals, enable it in ~prog-mode~.
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package highlight-numbers
+    :hook (prog-mode . highlight-numbers-mode))
+#+end_src
+
+** Fonts & theme
+Use Iosevka Nerd Font as default font:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 130)
+#+end_src
+
+Enable ligatures:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package ligature
+    :config
+    (ligature-set-ligatures 'prog-mode '("|||>" "<|||" "<==>" "<!--" "####" "~~>" "***" "||=" "||>"
+					 ":::" "::=" "=:=" "===" "==>" "=!=" "=>>" "=<<" "=/=" "!=="
+					 "!!." ">=>" ">>=" ">>>" ">>-" ">->" "->>" "-->" "---" "-<<"
+					 "<~~" "<~>" "<*>" "<||" "<|>" "<$>" "<==" "<=>" "<=<" "<->"
+					 "<--" "<-<" "<<=" "<<-" "<<<" "<+>" "</>" "###" "#_(" "..<"
+					 "..." "+++" "/==" "///" "_|_" "www" "&&" "^=" "~~" "~@" "~="
+					 "~>" "~-" "**" "*>" "*/" "||" "|}" "|]" "|=" "|>" "|-" "{|"
+					 "[|" "]#" "::" ":=" ":>" ":<" "$>" "==" "=>" "!=" "!!" ">:"
+					 ">=" ">>" ">-" "-~" "-|" "->" "--" "-<" "<~" "<*" "<|" "<:"
+					 "<$" "<=" "<>" "<-" "<<" "<+" "</" "#{" "#[" "#:" "#=" "#!"
+					 "##" "#(" "#?" "#_" "%%" ".=" ".-" ".." ".?" "+>" "++" "?:"
+					 "?=" "?." "??" ";;" "/*" "/=" "/>" "//" "__" "~~" "(*" "*)"
+					 "\\\\" "://"))
+    (global-ligature-mode t))
+#+end_src
+
+Use ~doom-one~ as default theme:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package doom-themes
+    :config
+    (load-theme 'doom-one t)
+
+    (doom-themes-visual-bell-config)
+    (doom-themes-neotree-config)
+    ;; Corrects (and improves) org-mode's native fontification.
+    (doom-themes-org-config))
+#+end_src
+
+** Misc
+In ~prog-mode~ there should be autoparens, whilst in ~org-mode~ and ~text-mode~ visual-line-mode should be enabled (in order not to truncate lines).
+
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (add-hook 'prog-mode-hook 'electric-pair-mode)
+  (add-multiple-hooks '(org-mode-hook text-mode-hook) 'visual-line-mode)
+#+end_src
+
+Add icons:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package all-the-icons
+    :if (display-graphic-p))
+#+end_src
+
+I'm a confident person:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (fset 'yes-or-no-p 'y-or-n-p)
+#+end_src
+
+Ask for confirmation when killing emacs
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (setq confirm-kill-emacs #'(lambda (&rest _)
+			      (y-or-n-p "Do you really want to kill me?!?")))
+#+end_src
+
+* Keybindings
+** ~esc~ key
+#+begin_src emacs-lisp emacs.d/init.el
+   (global-set-key (kbd "ESC") 'keyboard-escape-quit)
+#+end_src
+
+** which-key
+=A minor mode for Emacs that displays the key bindings following your currently entered incomplete command (a prefix) in a popup.=
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package which-key
+    :init (which-key-mode))
+#+end_src
+
+** General
+Use ~SPC~ as leader key (like Spacemacs does) and bind some useful commands.
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package general
+    :config
+    (general-evil-setup t)
+
+    (general-create-definer leader-key-definer
+      :keymaps '(normal insert visual emacs)
+      :prefix "SPC"
+      :global-prefix "C-SPC")
+
+    (leader-key-definer
+      "SPC" '(execute-extended-command :which-key "execute command")
+      "RET" 'browse-url
+      "."   'repeat
+      "f"   '(:ignore t :which-key "Files")
+      "ff"  'find-file
+      "b"   '(:ignore t :which-key "Buffers")
+      "bk"  'kill-buffer
+      "bi"  'ibuffer
+      "w"   '(:ignore t :which-key "Windows")
+      "ws"  'split-window-below
+      "wv"  'split-window-horizontally
+      "ww"  '(other-window :which-key "cycle")
+      "wk"  'delete-window))
+      #+end_src
+
+* Eshell
+** When your time has come
+When Eshell is killed, delete its window (unless it's the only one):
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (advice-add 'eshell-life-is-too-much
+	      :after #'(lambda ()
+			 (unless (one-window-p)
+			   (delete-window))))
+#+end_src
+
+** Split eshell
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (defun split-eshell ()
+    "Create a split window below the current one, with an eshell"
+    (interactive)
+    (select-window (split-window-below))
+    (eshell))
+#+end_src
+
+Add a shortcut to call ~split-eshell~ using the leader key:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (leader-key-definer
+    "'" 'split-eshell)
+#+end_src
+
+** Aliases
+Set handy aliases:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (mapc (lambda (alias) (defalias (car alias) (cdr alias)))
+	'((eshell/ff   . find-file)
+	  (eshell/ffow . find-file-other-window)))
+#+end_src
+
+* Packages
+** Vertico, Consult, Marginalia
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package vertico
+    :init (vertico-mode))
+
+  (use-package marginalia
+    :init (marginalia-mode))
+
+  (use-package all-the-icons-completion
+    :after (marginalia)
+    :init (all-the-icons-completion-mode)
+    :hook (marginalia-mode-hook . all-the-icons-completion-marginalia-setup))
+
+  (use-package consult)
+  (use-package embark)
+  (use-package embark-consult)
+#+end_src
+
+** Evil
+Emulate vim bindings in Emacs, set ~evil-want-keybinding~ to ~nil~ for [[https://github.com/emacs-evil/evil-collection/issues/60][this issue]] and fix the initial state for some /unusual/ modes.
+
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package evil
+    :init
+    (setq evil-want-keybinding nil)
+    :config
+    (evil-mode 1)
+    (dolist (lst '((special-mode . motion)
+		   (tetris-mode  . emacs)))
+      (evil-set-initial-state (car lst) (cdr lst))))
+#+end_src
+
+
+
+Add evil collection:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package evil-collection
+    :after evil
+    :init (evil-collection-init))
+#+end_src
+
+** Org
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package org)
+#+end_src
+
+Use ~org-appear~ in order to toggle visibility of hidden elements:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package org-appear
+    :hook (org-mode-hook . org-appear-mode))
+
+#+end_src
+
+When saving an org config file Emacs should be asking if tangle.
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (add-hook 'after-save-hook (lambda ()
+			       (when (and (string-equal (buffer-name) "config.org")
+					  (y-or-n-p "Tangle?"))
+				 (org-babel-tangle))))
+#+end_src
+
+** Magit
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package magit)
+#+end_src
+
+** Company
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package company
+    :init (global-company-mode))
+
+  (use-package company-quickhelp
+    :init (company-quickhelp-mode))
+#+end_src
+
+** Helpful
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package helpful)
+#+end_src
+
+** PDF
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package pdf-tools
+    :magic ("%PDF" . pdf-view-mode)
+    :config
+    (pdf-loader-install :no-query))
+#+end_src
+** Languages
+*** Nix
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (when (is-language-active "nix")
+    (use-package nix-mode
+      :mode "\\.nix\\'"))
+#+end_src
+
+*** Common Lisp
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (when (is-language-active "clisp")
+    (use-package slime
+      :config (setq inferior-lisp-program "sbcl")))
+#+end_src
