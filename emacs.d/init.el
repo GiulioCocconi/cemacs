@@ -27,7 +27,8 @@
   (if (string= user-emacs-directory "/etc/emacs.d/")
       (setq user-emacs-directory "~/emacs.d/")
     (progn
-      (message "Warning! Using an impure config in Nix!")
+      (display-warning 'nix-config
+		       "Using an impure config in NixOS!")
       (setq is-nix-pure nil))))
 
 (when (and IS-WINDOWS
@@ -127,7 +128,7 @@
 (fset 'yes-or-no-p 'y-or-n-p)
 
 (setq confirm-kill-emacs #'(lambda (&rest _)
-			    (y-or-n-p "Do you really want to kill me?!?")))
+			     (y-or-n-p "Do you really want to kill me?!?")))
 
 (use-package which-key
   :init (which-key-mode))

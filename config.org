@@ -71,9 +71,10 @@ This config aims to be reproducible whilst being usable on all major operating s
     (if (string= user-emacs-directory "/etc/emacs.d/")
 	(setq user-emacs-directory "~/emacs.d/")
       (progn
-	(message "Warning! Using an impure config in Nix!")
+	(display-warning 'nix-config
+			 "Using an impure config in NixOS!")
 	(setq is-nix-pure nil))))
-#+end_src
+    #+end_src
 
 ** Windows
 Set ~HOME~ environment variable when on Windows.
@@ -252,13 +253,13 @@ I'm a confident person:
 Ask for confirmation when killing emacs
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (setq confirm-kill-emacs #'(lambda (&rest _)
-			      (y-or-n-p "Do you really want to kill me?!?")))
+			       (y-or-n-p "Do you really want to kill me?!?")))
 #+end_src
 
 * Keybindings
 ** ~esc~ key
 #+begin_src emacs-lisp emacs.d/init.el
-   (global-set-key (kbd "ESC") 'keyboard-escape-quit)
+  (global-set-key (kbd "ESC") 'keyboard-escape-quit)
 #+end_src
 
 ** which-key
@@ -294,7 +295,7 @@ Use ~SPC~ as leader key (like Spacemacs does) and bind some useful commands.
       "wv"  'split-window-horizontally
       "ww"  '(other-window :which-key "cycle")
       "wk"  'delete-window))
-      #+end_src
+#+end_src
 
 * Eshell
 ** When your time has come
