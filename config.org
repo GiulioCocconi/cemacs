@@ -146,7 +146,8 @@ Let's fix that by placing all Backup Files in the temp directory (which is ~/tmp
 #+begin_src emacs-lisp  :tangle emacs.d/init.el
   (setq inhibit-startup-screen  t
 	inhibit-startup-message t
-	visible-bell            nil)
+	visible-bell            nil
+	use-dialog-box          nil)
 
   (scroll-bar-mode -1)
   (tool-bar-mode   -1)

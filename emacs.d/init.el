@@ -66,7 +66,8 @@
 
 (setq inhibit-startup-screen  t
       inhibit-startup-message t
-      visible-bell            nil)
+      visible-bell            nil
+      use-dialog-box          nil)
 
 (scroll-bar-mode -1)
 (tool-bar-mode   -1)
