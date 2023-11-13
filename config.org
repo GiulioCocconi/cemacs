@@ -34,7 +34,7 @@ Here there are some misc utils (functions or vars).
 #+end_src
 
 * Startup
-Some ideas are stealed from https://git.sr.ht/~knazarov/nixos/tree/master/item/emacs.el.
+Some ideas are stolen from https://git.sr.ht/~knazarov/nixos/tree/master/item/emacs.el.
 
 ** GC
 Prevent aggressive garbage collecting by increasing the threshold temporarily, restoring it at the end.
@@ -64,7 +64,7 @@ You have to restore the defaults after the init.
 
 ** ~user-emacs-directory~
 This config aims to be reproducible whilst being usable on all major operating systems. When using the ~CoGiSystems~ config for NixOS one has two option to launch Emacs:
-1) Using the command ~cemacs~: This config repository is pulled from GH as the flake input and copied over ~/etc/emacs.d~, that becomes the ~user-emacs-directory~. When the config is loaded, however, this variable should be setted to ~$HOME/.emacs.d~ in order to avoid write permission errors.
+1) Using the command ~cemacs~: This config repository is pulled from GH as the flake input and copied over ~/etc/emacs.d~, that becomes the ~user-emacs-directory~. When the config is loaded, however, this variable should be set to ~$HOME/.emacs.d~ in order to avoid write permission errors.
 2) Using the command ~emacs~: everything works normally. That's useful when testing some features that aren't already in the git repo. However the user should be warned that this config is not reproducible.
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (when IS-NIX
@@ -74,7 +74,7 @@ This config aims to be reproducible whilst being usable on all major operating s
 	(display-warning 'nix-config
 			 "Using an impure config in NixOS!")
 	(setq is-nix-pure nil))))
-    #+end_src
+#+end_src
 
 ** Windows
 Set ~HOME~ environment variable when on Windows.
@@ -117,6 +117,7 @@ More configuration has to be done when not managed by Nix, in particular package
 * State files
 ** Recent files
 From [[https://www.emacswiki.org/emacs/RecentFiles][Emacs Wiki]]:
+
 ==Recentf is a minor mode that builds a list of recently opened files. This list is automatically saved across sessions on exiting Emacs - you can then access this list through a command or the menu.==
 
 #+begin_src emacs-lisp :tangle emacs.d/init.el
@@ -128,6 +129,7 @@ From [[https://www.emacswiki.org/emacs/RecentFiles][Emacs Wiki]]:
 
 ** Backup files
 From [[https://www.emacswiki.org/emacs/BackupDirectory][Emacs Wiki]]:
+
 ==By default Emacs saves BackupFiles under the original name with a tilde `~’ appended [...] This is primitive and boring.==
 
 Let's fix that by placing all Backup Files in the temp directory (which is ~/tmp~ on Linux and ~/Temp~ on Windows)
