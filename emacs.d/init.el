@@ -25,7 +25,7 @@
 
 (when IS-NIX
   (if (string= user-emacs-directory "/etc/emacs.d/")
-      (setq user-emacs-directory "~/emacs.d/")
+      (setq user-emacs-directory "~/.emacs.d/")
     (progn
       (display-warning 'nix-config
 		       "Using an impure config in NixOS!")

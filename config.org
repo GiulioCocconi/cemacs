@@ -63,13 +63,13 @@ You have to restore the defaults after the init.
 #+end_src
 
 ** ~user-emacs-directory~
-This config aims to be reproducible whilst being usable on all major operating systems. When using the ~CoGiSystems~ config for NixOS one has two option to launch Emacs:
+This config aims to be reproducible whilst being usable on all major operating systems. When using the ~CoGiSystems~ config for NixOS one has two options to launch Emacs:
 1) Using the command ~cemacs~: This config repository is pulled from GH as the flake input and copied over ~/etc/emacs.d~, that becomes the ~user-emacs-directory~. When the config is loaded, however, this variable should be set to ~$HOME/.emacs.d~ in order to avoid write permission errors.
-2) Using the command ~emacs~: everything works normally. That's useful when testing some features that aren't already in the git repo. However the user should be warned that this config is not reproducible.
+2) Using the script ~start.sh~ in the repo: everything works as in every other distro. That's useful when testing some features before they are pushed into the main branch. The user should be warned that this config is not reproducible.
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (when IS-NIX
     (if (string= user-emacs-directory "/etc/emacs.d/")
-	(setq user-emacs-directory "~/emacs.d/")
+	(setq user-emacs-directory "~/.emacs.d/")
       (progn
 	(display-warning 'nix-config
 			 "Using an impure config in NixOS!")
