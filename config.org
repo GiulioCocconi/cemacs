@@ -175,7 +175,7 @@ They should be active when in ~prog-mode~:
   (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 #+end_src
 
-** Tiling WM
+** Tiling WM fix
 Emacs will, by default, size its window by charactes, since this usually doesn't fit to an exact pixel size, it might cause Tiling WMs to display unnecessary gaps. Let's fix it!
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (setq frame-resize-pixelwise t)
