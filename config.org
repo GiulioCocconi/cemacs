@@ -326,11 +326,14 @@ Add a shortcut to call ~split-eshell~ using the leader key:
 #+end_src
 
 ** Aliases
-Set handy aliases:
+Set handy aliases & functions:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (mapc (lambda (alias) (defalias (car alias) (cdr alias)))
-	'((eshell/ff   . find-file)
-	  (eshell/ffow . find-file-other-window)))
+	'((eshell/ffow . find-file-other-window)))
+
+  (defun eshell/ff (path)
+    (eshell-life-is-too-much)
+    (find-file path))
 #+end_src
 
 * Packages

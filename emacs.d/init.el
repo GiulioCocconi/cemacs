@@ -173,8 +173,11 @@
   "'" 'split-eshell)
 
 (mapc (lambda (alias) (defalias (car alias) (cdr alias)))
-      '((eshell/ff   . find-file)
-	(eshell/ffow . find-file-other-window)))
+      '((eshell/ffow . find-file-other-window)))
+
+(defun eshell/ff (path)
+  (eshell-life-is-too-much)
+  (find-file path))
 
 (use-package vertico
   :init (vertico-mode))
