@@ -238,4 +238,5 @@
 
 (when (is-language-active "clisp")
   (use-package slime
+    :commands slime-mode
     :config (setq inferior-lisp-program "sbcl")))
