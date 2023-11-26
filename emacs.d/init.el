@@ -207,10 +207,13 @@
   :after evil
   :init (evil-collection-init))
 
-(use-package org)
+(use-package org
+  :config
+  (setq org-hide-emphasis-markers t))
 
 (use-package org-appear
-  :hook (org-mode-hook . org-appear-mode))
+  :after org
+  :hook (org-mode . org-appear-mode))
 
 (add-hook 'after-save-hook (lambda ()
 			     (when (and (string-equal (buffer-name) "config.org")

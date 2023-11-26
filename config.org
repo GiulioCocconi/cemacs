@@ -3,7 +3,6 @@
 #+EMAIL: coccogiulio8@gmail.com
 
 #+STARTUP: overview
-
 * Utils
 Here there are some misc utils (functions or vars).
 #+begin_src emacs-lisp :tangle emacs.d/init.el
@@ -380,13 +379,16 @@ Add evil collection:
 
 ** Org
 #+begin_src emacs-lisp :tangle emacs.d/init.el
-  (use-package org)
+  (use-package org
+    :config
+    (setq org-hide-emphasis-markers t))
 #+end_src
 
 Use ~org-appear~ in order to toggle visibility of hidden elements:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package org-appear
-    :hook (org-mode-hook . org-appear-mode))
+    :after org
+    :hook (org-mode . org-appear-mode))
 
 #+end_src
 
