@@ -104,12 +104,6 @@
 (tooltip-mode    -1)
 (menu-bar-mode   -1)
 
-(setq initial-scratch-message (purecopy "\
-;; CoGiSystems emacs
-;; Remember to have fun :)
-
-"))
-
 (setq display-line-numbers-type 'relative)
 
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
@@ -175,6 +169,12 @@
     "7" 'winum-select-window-7
     "8" 'winum-select-window-8
     "9" 'winum-select-window-9))
+
+(setq initial-scratch-message (purecopy "\
+;; CoGiSystems Emacs
+;; Remember to have fun :)
+
+"))
 
 (add-hook 'prog-mode-hook 'electric-pair-mode)
 (add-multiple-hooks '(org-mode-hook text-mode-hook) 'visual-line-mode)

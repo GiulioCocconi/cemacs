@@ -198,15 +198,6 @@ Use ~SPC~ as leader key (like Spacemacs does) and bind some useful commands.
   (menu-bar-mode   -1)
 #+end_src
 
-** Set CoGiSystems scratch message
-#+begin_src emacs-lisp :tangle emacs.d/init.el
-  (setq initial-scratch-message (purecopy "\
-  ;; CoGiSystems emacs
-  ;; Remember to have fun :)
-
-  "))
-#+end_src
-
 ** Line numbers
 Use relative line numbers:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
@@ -310,6 +301,15 @@ Use ~doom-one~ as default theme:
 #+end_src
 
 ** Misc
+Set CogiSystems scratch message:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (setq initial-scratch-message (purecopy "\
+  ;; CoGiSystems Emacs
+  ;; Remember to have fun :)
+
+  "))
+#+end_src
+
 In ~prog-mode~ there should be autoparens, whilst in ~org-mode~ and ~text-mode~ visual-line-mode should be enabled (in order not to truncate lines).
 
 #+begin_src emacs-lisp :tangle emacs.d/init.el
@@ -328,14 +328,14 @@ I'm a confident person:
   (fset 'yes-or-no-p 'y-or-n-p)
 #+end_src
 
-Ask for confirmation when killing emacs
+Ask for confirmation when killing emacs:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (setq confirm-kill-emacs #'(lambda (&rest _)
 			       (y-or-n-p "Do you really want to kill me?!?")))
 #+end_src
 
 * Eshell
-** When your time has come
+** When your time has come!
 When Eshell is killed, delete its window (unless it's the only one):
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (advice-add 'eshell-life-is-too-much
@@ -372,7 +372,6 @@ Set handy aliases & functions:
 
 * Packages
 ** Vertico, Consult, Marginalia
-
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package vertico
     :init (vertico-mode))
