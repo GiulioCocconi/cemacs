@@ -8,6 +8,9 @@
 (defvar language-list nil
   "The list of programming languages supported by this config that are manually managed  (if `IS-NIX' is non-nil then you can, and actually should, manage your programming languages with nix)")
 
+(defvar custom-font-list nil
+  "List of custom fonts to be added to the default font list")
+
 (when IS-NIX
   (defvar is-nix-pure t
     "True if (and only if) using a pure config"))
@@ -64,6 +67,33 @@
 (setq auto-save-file-name-transforms
       `((".*" ,temporary-file-directory t)))
 
+(use-package which-key
+  :init (which-key-mode))
+
+(use-package general
+  :config
+  (general-evil-setup t)
+
+  (general-create-definer leader-key-definer
+    :keymaps '(normal insert visual emacs)
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+
+  (leader-key-definer
+    "SPC" '(execute-extended-command :which-key "execute command")
+    "RET" 'browse-url
+    "."   'repeat
+    "f"   '(:ignore t :which-key "Files")
+    "ff"  'find-file
+    "b"   '(:ignore t :which-key "Buffers")
+    "bk"  'kill-buffer
+    "bi"  'ibuffer
+    "w"   '(:ignore t :which-key "Windows")
+    "ws"  'split-window-below
+    "wv"  'split-window-horizontally
+    "ww"  '(other-window :which-key "cycle")
+    "wk"  'delete-window))
+
 (setq inhibit-startup-screen  t
       inhibit-startup-message t
       visible-bell            nil
@@ -92,7 +122,17 @@
 (use-package highlight-numbers
   :hook (prog-mode . highlight-numbers-mode))
 
-(set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 130)
+(defconst USABLE-FONTS
+      (seq-filter #'(lambda (font-name)
+		      (find-font (font-spec :name font-name)))
+		 (append '("Iosevka Nerd Font"
+			    "Iosevka NF")
+			  custom-font-list)))
+
+(if (null USABLE-FONTS)
+    (display-warning 'font
+		     "No compatible font found, falling back to default!")
+  (set-face-attribute 'default nil :font (car USABLE-FONTS) :height 130))
 
 (use-package ligature
   :config
@@ -120,6 +160,22 @@
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
+(use-package winum
+  :init (winum-mode)
+  :config
+  (leader-key-definer
+    "`" 'winum-select-window-by-number
+    "0" 'winum-select-window-0-or-10
+    "1" 'winum-select-window-1
+    "2" 'winum-select-window-2
+    "3" 'winum-select-window-3
+    "4" 'winum-select-window-4
+    "5" 'winum-select-window-5
+    "6" 'winum-select-window-6
+    "7" 'winum-select-window-7
+    "8" 'winum-select-window-8
+    "9" 'winum-select-window-9))
+
 (add-hook 'prog-mode-hook 'electric-pair-mode)
 (add-multiple-hooks '(org-mode-hook text-mode-hook) 'visual-line-mode)
 
@@ -130,33 +186,6 @@
 
 (setq confirm-kill-emacs #'(lambda (&rest _)
 			     (y-or-n-p "Do you really want to kill me?!?")))
-
-(use-package which-key
-  :init (which-key-mode))
-
-(use-package general
-  :config
-  (general-evil-setup t)
-
-  (general-create-definer leader-key-definer
-    :keymaps '(normal insert visual emacs)
-    :prefix "SPC"
-    :global-prefix "C-SPC")
-
-  (leader-key-definer
-    "SPC" '(execute-extended-command :which-key "execute command")
-    "RET" 'browse-url
-    "."   'repeat
-    "f"   '(:ignore t :which-key "Files")
-    "ff"  'find-file
-    "b"   '(:ignore t :which-key "Buffers")
-    "bk"  'kill-buffer
-    "bi"  'ibuffer
-    "w"   '(:ignore t :which-key "Windows")
-    "ws"  'split-window-below
-    "wv"  'split-window-horizontally
-    "ww"  '(other-window :which-key "cycle")
-    "wk"  'delete-window))
 
 (advice-add 'eshell-life-is-too-much
 	    :after #'(lambda ()

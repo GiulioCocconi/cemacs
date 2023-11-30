@@ -16,6 +16,9 @@ Here there are some misc utils (functions or vars).
   (defvar language-list nil
     "The list of programming languages supported by this config that are manually managed  (if `IS-NIX' is non-nil then you can, and actually should, manage your programming languages with nix)")
 
+  (defvar custom-font-list nil
+    "List of custom fonts to be added to the default font list")
+
   (when IS-NIX
     (defvar is-nix-pure t
       "True if (and only if) using a pure config"))
@@ -25,7 +28,7 @@ Here there are some misc utils (functions or vars).
 	     (or (getenv (concat "NIX_LANG_" (upcase lang)))
 		 (string-equal lang "nix")))
 	(member lang language-list)))
-
+  
   (defun add-multiple-hooks (hooks fun)
     "Add function to multiple hooks"
     (dolist (hook hooks)
@@ -140,6 +143,47 @@ Let's fix that by placing all Backup Files in the temp directory (which is ~/tmp
 	`((".*" ,temporary-file-directory t)))
 #+end_src
 
+* Keybindings
+** ~esc~ key
+#+begin_src emacs-lisp emacs.d/init.el
+  (global-set-key (kbd "ESC") 'keyboard-escape-quit)
+#+end_src
+
+** which-key
+=A minor mode for Emacs that displays the key bindings following your currently entered incomplete command (a prefix) in a popup.=
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package which-key
+    :init (which-key-mode))
+#+end_src
+
+** General
+Use ~SPC~ as leader key (like Spacemacs does) and bind some useful commands.
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package general
+    :config
+    (general-evil-setup t)
+
+    (general-create-definer leader-key-definer
+      :keymaps '(normal insert visual emacs)
+      :prefix "SPC"
+      :global-prefix "C-SPC")
+
+    (leader-key-definer
+      "SPC" '(execute-extended-command :which-key "execute command")
+      "RET" 'browse-url
+      "."   'repeat
+      "f"   '(:ignore t :which-key "Files")
+      "ff"  'find-file
+      "b"   '(:ignore t :which-key "Buffers")
+      "bk"  'kill-buffer
+      "bi"  'ibuffer
+      "w"   '(:ignore t :which-key "Windows")
+      "ws"  'split-window-below
+      "wv"  'split-window-horizontally
+      "ww"  '(other-window :which-key "cycle")
+      "wk"  'delete-window))
+#+end_src
+
 * Appearence
 ** Disable GUI and bloat
 #+begin_src emacs-lisp  :tangle emacs.d/init.el
@@ -196,9 +240,22 @@ Use ~highlight-numbers~ to highlight numbers literals, enable it in ~prog-mode~.
 #+end_src
 
 ** Fonts & theme
-Use Iosevka Nerd Font as default font:
+List of supported fonts:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
-  (set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 130)
+  (defconst USABLE-FONTS
+	(seq-filter #'(lambda (font-name)
+			(find-font (font-spec :name font-name)))
+		   (append '("Iosevka Nerd Font"
+			      "Iosevka NF")
+			    custom-font-list)))
+#+end_src
+
+Set the default one to be the first of the supported.
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (if (null USABLE-FONTS)
+      (display-warning 'font
+		       "No compatible font found, falling back to default!")
+    (set-face-attribute 'default nil :font (car USABLE-FONTS) :height 130))
 #+end_src
 
 Enable ligatures:
@@ -233,6 +290,25 @@ Use ~doom-one~ as default theme:
     (doom-themes-org-config))
 #+end_src
 
+** Window numbers
+#+begin_src emacs-lisp :tangle emacs.d/init.el 
+   (use-package winum
+     :init (winum-mode)
+     :config
+     (leader-key-definer
+       "`" 'winum-select-window-by-number
+       "0" 'winum-select-window-0-or-10
+       "1" 'winum-select-window-1
+       "2" 'winum-select-window-2
+       "3" 'winum-select-window-3
+       "4" 'winum-select-window-4
+       "5" 'winum-select-window-5
+       "6" 'winum-select-window-6
+       "7" 'winum-select-window-7
+       "8" 'winum-select-window-8
+       "9" 'winum-select-window-9))
+#+end_src
+
 ** Misc
 In ~prog-mode~ there should be autoparens, whilst in ~org-mode~ and ~text-mode~ visual-line-mode should be enabled (in order not to truncate lines).
 
@@ -256,47 +332,6 @@ Ask for confirmation when killing emacs
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (setq confirm-kill-emacs #'(lambda (&rest _)
 			       (y-or-n-p "Do you really want to kill me?!?")))
-#+end_src
-
-* Keybindings
-** ~esc~ key
-#+begin_src emacs-lisp emacs.d/init.el
-  (global-set-key (kbd "ESC") 'keyboard-escape-quit)
-#+end_src
-
-** which-key
-=A minor mode for Emacs that displays the key bindings following your currently entered incomplete command (a prefix) in a popup.=
-#+begin_src emacs-lisp :tangle emacs.d/init.el
-  (use-package which-key
-    :init (which-key-mode))
-#+end_src
-
-** General
-Use ~SPC~ as leader key (like Spacemacs does) and bind some useful commands.
-#+begin_src emacs-lisp :tangle emacs.d/init.el
-  (use-package general
-    :config
-    (general-evil-setup t)
-
-    (general-create-definer leader-key-definer
-      :keymaps '(normal insert visual emacs)
-      :prefix "SPC"
-      :global-prefix "C-SPC")
-
-    (leader-key-definer
-      "SPC" '(execute-extended-command :which-key "execute command")
-      "RET" 'browse-url
-      "."   'repeat
-      "f"   '(:ignore t :which-key "Files")
-      "ff"  'find-file
-      "b"   '(:ignore t :which-key "Buffers")
-      "bk"  'kill-buffer
-      "bi"  'ibuffer
-      "w"   '(:ignore t :which-key "Windows")
-      "ws"  'split-window-below
-      "wv"  'split-window-horizontally
-      "ww"  '(other-window :which-key "cycle")
-      "wk"  'delete-window))
 #+end_src
 
 * Eshell
@@ -337,6 +372,7 @@ Set handy aliases & functions:
 
 * Packages
 ** Vertico, Consult, Marginalia
+
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package vertico
     :init (vertico-mode))
