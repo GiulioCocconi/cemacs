@@ -1,3 +1,3 @@
 #!/bin/sh
 cd $(dirname $0)
-emacs --init-directory=./emacs.d $@ &
+setsid emacs --init-directory=./emacs.d $@
