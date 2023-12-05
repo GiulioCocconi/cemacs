@@ -117,11 +117,11 @@
   :hook (prog-mode . highlight-numbers-mode))
 
 (defconst USABLE-FONTS
-      (seq-filter #'(lambda (font-name)
-		      (find-font (font-spec :name font-name)))
-		 (append '("Iosevka Nerd Font"
-			    "Iosevka NF")
-			  custom-font-list)))
+  (seq-filter #'(lambda (font-name)
+		  (find-font (font-spec :name font-name)))
+	      (append '("Iosevka Nerd Font"
+			"Iosevka NF")
+		      custom-font-list)))
 
 (if (null USABLE-FONTS)
     (display-warning 'font

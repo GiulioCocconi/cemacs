@@ -3,6 +3,10 @@
 #+EMAIL: coccogiulio8@gmail.com
 
 #+STARTUP: overview
+* TODO
+1. Add mode specific keymaps to General
+2. Check for Windows specific code to be added
+
 * Utils
 Here there are some misc utils (functions or vars).
 #+begin_src emacs-lisp :tangle emacs.d/init.el
@@ -48,11 +52,35 @@ Prevent aggressive garbage collecting by increasing the threshold temporarily, r
 
 ** Disable unnecessary things
 Disable unnecessary ways to handle files during startup.
-
 #+BEGIN_SRC emacs-lisp :tangle emacs.d/early-init.el
   (defvar saved--file-name-handler-alist file-name-handler-alist)
   (setq file-name-handler-alist nil)
 #+END_SRC
+
+Disable ~bidi~:
+#+begin_src emacs-lisp :tangle emacs.d/early-init.el
+  (setq-default bidi-display-reordering 'left-to-right 
+		bidi-paragraph-direction 'left-to-right)
+  (setq bidi-inhibit-bpa t)
+#+end_src
+
+Disable rendering cursors or region highlights in non-focused windows:
+#+begin_src emacs-lisp :tangle emacs.d/early-init.el
+  (setq-default cursor-in-non-selected-windows nil)
+  (setq highlight-nonselected-windows nil)
+#+end_src
+
+Use a more performant scrolling:
+#+begin_src emacs-lisp :tangle emacs.d/early-init.el
+  (setq fast-but-imprecise-scrolling t)
+#+end_src
+
+Disable compile warnings:
+#+begin_src emacs-lisp :tangle emacs.d/early-init.el
+  (setq native-comp-async-report-warnings-errors 'silent)
+  (setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
+#+end_src
+
 
 ** Restore defaults
 You have to restore the defaults after the init.
@@ -62,6 +90,13 @@ You have to restore the defaults after the init.
 				 (setq gc-cons-threshold 16777216
 				       gc-cons-percentage 0.1)
 				 (setq file-name-handler-alist saved--file-name-handler-alist)))
+#+end_src
+
+** Coding System
+Set the language environment to be ~UTF-8~:
+#+begin_src emacs-lisp :tangle emacs.d/early-init.el
+  (set-language-environment "UTF-8")
+  (setq default-input-method nil)
 #+end_src
 
 ** ~user-emacs-directory~
@@ -234,11 +269,11 @@ Use ~highlight-numbers~ to highlight numbers literals, enable it in ~prog-mode~.
 List of supported fonts:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (defconst USABLE-FONTS
-	(seq-filter #'(lambda (font-name)
-			(find-font (font-spec :name font-name)))
-		   (append '("Iosevka Nerd Font"
-			      "Iosevka NF")
-			    custom-font-list)))
+    (seq-filter #'(lambda (font-name)
+		    (find-font (font-spec :name font-name)))
+		(append '("Iosevka Nerd Font"
+			  "Iosevka NF")
+			custom-font-list)))
 #+end_src
 
 Set the default one to be the first of the supported.
@@ -283,21 +318,21 @@ Use ~doom-one~ as default theme:
 
 ** Window numbers
 #+begin_src emacs-lisp :tangle emacs.d/init.el 
-   (use-package winum
-     :init (winum-mode)
-     :config
-     (leader-key-definer
-       "`" 'winum-select-window-by-number
-       "0" 'winum-select-window-0-or-10
-       "1" 'winum-select-window-1
-       "2" 'winum-select-window-2
-       "3" 'winum-select-window-3
-       "4" 'winum-select-window-4
-       "5" 'winum-select-window-5
-       "6" 'winum-select-window-6
-       "7" 'winum-select-window-7
-       "8" 'winum-select-window-8
-       "9" 'winum-select-window-9))
+  (use-package winum
+    :init (winum-mode)
+    :config
+    (leader-key-definer
+      "`" 'winum-select-window-by-number
+      "0" 'winum-select-window-0-or-10
+      "1" 'winum-select-window-1
+      "2" 'winum-select-window-2
+      "3" 'winum-select-window-3
+      "4" 'winum-select-window-4
+      "5" 'winum-select-window-5
+      "6" 'winum-select-window-6
+      "7" 'winum-select-window-7
+      "8" 'winum-select-window-8
+      "9" 'winum-select-window-9))
 #+end_src
 
 ** Misc
