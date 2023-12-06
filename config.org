@@ -57,7 +57,7 @@ Disable unnecessary ways to handle files during startup.
   (setq file-name-handler-alist nil)
 #+END_SRC
 
-Disable ~bidi~:
+Disable bidirectional editing (let's write left to right!):
 #+begin_src emacs-lisp :tangle emacs.d/early-init.el
   (setq-default bidi-display-reordering 'left-to-right 
 		bidi-paragraph-direction 'left-to-right)
@@ -80,7 +80,6 @@ Disable compile warnings:
   (setq native-comp-async-report-warnings-errors 'silent)
   (setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
 #+end_src
-
 
 ** Restore defaults
 You have to restore the defaults after the init.
