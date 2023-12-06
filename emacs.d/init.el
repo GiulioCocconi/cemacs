@@ -259,10 +259,11 @@
 
 (use-package helpful)
 
-(use-package pdf-tools
+(unless IS-WINDOWS
+  (use-package pdf-tools
   :magic ("%PDF" . pdf-view-mode)
   :config
-  (pdf-loader-install :no-query))
+  (pdf-loader-install :no-query)))
 
 (when (is-language-active "nix")
   (use-package nix-mode

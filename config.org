@@ -492,10 +492,11 @@ When saving an org config file Emacs should be asking if tangle.
 ** PDF
 Read pdf files in emacs!
 #+begin_src emacs-lisp :tangle emacs.d/init.el
-  (use-package pdf-tools
+  (unless IS-WINDOWS
+    (use-package pdf-tools
     :magic ("%PDF" . pdf-view-mode)
     :config
-    (pdf-loader-install :no-query))
+    (pdf-loader-install :no-query)))
 #+end_src
 
 ** Languages
