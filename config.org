@@ -93,7 +93,7 @@ You have to restore the defaults after the init.
 
 ** Coding System
 Set the language environment to be ~UTF-8~:
-#+begin_src emacs-lisp :tangle emacs.d/early-init.el
+#+begin_src emacs-lisp :tangle emacs.d/init.el
   (set-language-environment "UTF-8")
   (setq default-input-method nil)
 #+end_src

@@ -20,6 +20,3 @@
 			       (setq gc-cons-threshold 16777216
 				     gc-cons-percentage 0.1)
 			       (setq file-name-handler-alist saved--file-name-handler-alist)))
-
-(set-language-environment "UTF-8")
-(setq default-input-method nil)

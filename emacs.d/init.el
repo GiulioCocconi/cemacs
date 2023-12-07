@@ -26,6 +26,9 @@
   (dolist (hook hooks)
     (add-hook hook fun)))
 
+(set-language-environment "UTF-8")
+(setq default-input-method nil)
+
 (when IS-NIX
   (if (string= user-emacs-directory "/etc/emacs.d/")
       (setq user-emacs-directory "~/.emacs.d/")
