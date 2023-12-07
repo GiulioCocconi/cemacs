@@ -12,8 +12,8 @@
   "List of custom fonts to be added to the default font list")
 
 (when IS-NIX
-  (defvar is-nix-pure t
-    "True if (and only if) using a pure config"))
+  (defconst IS-NIX-PURE (getenv "EMACS_PURE")
+    "True if (and only if) using a pure NixOS config"))
 
 (defun is-language-active (lang)
   (or (and IS-NIX
@@ -30,18 +30,15 @@
 (setq default-input-method nil)
 
 (when IS-NIX
-  (if (string= user-emacs-directory "/etc/emacs.d/")
-      (setq user-emacs-directory "~/.emacs.d/")
-    (progn
-      (display-warning 'nix-config
-		       "Using an impure config in NixOS!")
-      (setq is-nix-pure nil))))
+  (if IS-NIX-PURE
+      (setq user-emacs-directory "~/.emacs.d")
+    (display-warning 'nix-config "Using an impure config in NixOS!")))
 
 (when (and IS-WINDOWS
 	   (null (getenv "HOME")))
   (setenv "HOME" (getenv "USERPROFILE")))
 
-(unless (and IS-NIX is-nix-pure)
+(unless IS-NIX-PURE
   (require 'package)
 
   (setq package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -56,7 +53,7 @@
   (package-install 'use-package))
 (require 'use-package)
 
-(unless (and IS-NIX is-nix-pure)
+(unless IS-NIX-PURE
   (setq package-native-compile t
 	use-package-always-ensure t))
 
@@ -264,9 +261,9 @@
 
 (unless IS-WINDOWS
   (use-package pdf-tools
-  :magic ("%PDF" . pdf-view-mode)
-  :config
-  (pdf-loader-install :no-query)))
+    :magic ("%PDF" . pdf-view-mode)
+    :config
+    (pdf-loader-install :no-query)))
 
 (when (is-language-active "nix")
   (use-package nix-mode

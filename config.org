@@ -24,15 +24,15 @@ Here there are some misc utils (functions or vars).
     "List of custom fonts to be added to the default font list")
 
   (when IS-NIX
-    (defvar is-nix-pure t
-      "True if (and only if) using a pure config"))
+    (defconst IS-NIX-PURE (getenv "EMACS_PURE")
+      "True if (and only if) using a pure NixOS config"))
 
   (defun is-language-active (lang)
     (or (and IS-NIX
 	     (or (getenv (concat "NIX_LANG_" (upcase lang)))
 		 (string-equal lang "nix")))
 	(member lang language-list)))
-  
+
   (defun add-multiple-hooks (hooks fun)
     "Add function to multiple hooks"
     (dolist (hook hooks)
@@ -100,16 +100,13 @@ Set the language environment to be ~UTF-8~:
 
 ** ~user-emacs-directory~
 This config aims to be reproducible whilst being usable on all major operating systems. When using the ~CoGiSystems~ config for NixOS one has two options to launch Emacs:
-1) Using the command ~cemacs~: This config repository is pulled from GH as the flake input and copied over ~/etc/emacs.d~, that becomes the ~user-emacs-directory~. When the config is loaded, however, this variable should be set to ~$HOME/.emacs.d~ in order to avoid write permission errors.
+1) Using the command ~cemacs~: This config repository is pulled from GH as the flake input and that becomes the ~user-emacs-directory~. When the config is loaded, however, this variable should be set to ~$HOME/.emacs.d~ in order to avoid write permission errors.
 2) Using the script ~start.sh~ in the repo: everything works as in every other distro. That's useful when testing some features before they are pushed into the main branch. The user should be warned that this config is not reproducible.
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (when IS-NIX
-    (if (string= user-emacs-directory "/etc/emacs.d/")
-	(setq user-emacs-directory "~/.emacs.d/")
-      (progn
-	(display-warning 'nix-config
-			 "Using an impure config in NixOS!")
-	(setq is-nix-pure nil))))
+    (if IS-NIX-PURE
+	(setq user-emacs-directory "~/.emacs.d")
+      (display-warning 'nix-config "Using an impure config in NixOS!")))
 #+end_src
 
 ** Windows
@@ -124,7 +121,7 @@ Set ~HOME~ environment variable when on Windows.
 If the config isn't managed by Nix then download Melpa, Elpa and Org archives. If it's using Nix then packages should be managed by emacs-overlay's ~emacsWithPackagesFromUsePackage~ (see https://github.com/nix-community/emacs-overlay).
 
 #+begin_src emacs-lisp :tangle emacs.d/init.el
-  (unless (and IS-NIX is-nix-pure)
+  (unless IS-NIX-PURE
     (require 'package)
 
     (setq package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -145,7 +142,7 @@ Ensure that ~use-package~ is actually installed, then require it:
 
 More configuration has to be done when not managed by Nix, in particular package should be always ensured and AOT compilation should be enabled.
 #+begin_src emacs-lisp :tangle emacs.d/init.el
-  (unless (and IS-NIX is-nix-pure)
+  (unless IS-NIX-PURE
     (setq package-native-compile t
 	  use-package-always-ensure t))
 #+end_src
@@ -493,9 +490,9 @@ Read pdf files in emacs!
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (unless IS-WINDOWS
     (use-package pdf-tools
-    :magic ("%PDF" . pdf-view-mode)
-    :config
-    (pdf-loader-install :no-query)))
+      :magic ("%PDF" . pdf-view-mode)
+      :config
+      (pdf-loader-install :no-query)))
 #+end_src
 
 ** Languages
