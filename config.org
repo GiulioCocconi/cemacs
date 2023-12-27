@@ -3,6 +3,7 @@
 #+EMAIL: coccogiulio8@gmail.com
 
 #+STARTUP: overview
+
 * TODO
 1. Add mode specific keymaps to General
 2. Check for Windows specific code to be added
@@ -110,7 +111,7 @@ This config aims to be reproducible whilst being usable on all major operating s
 #+end_src
 
 ** Windows
-Set ~HOME~ environment variable when on Windows.
+Set ~HOME~ environment variable when on Windows. For a list of Windows environment variables see [[https://learn.microsoft.com/en-us/windows/deployment/usmt/usmt-recognized-environment-variables][this]].
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (when (and IS-WINDOWS
 	     (null (getenv "HOME")))
@@ -118,7 +119,7 @@ Set ~HOME~ environment variable when on Windows.
 #+end_src
 
 * Packages setup
-If the config isn't managed by Nix then download Melpa, Elpa and Org archives. If it's using Nix then packages should be managed by emacs-overlay's ~emacsWithPackagesFromUsePackage~ (see https://github.com/nix-community/emacs-overlay).
+If the config isn't managed by Nix then download Melpa, Elpa and Org archives. If it's using Nix then packages should be managed by emacs-overlay's ~emacsWithPackagesFromUsePackage~ (see [[https://github.com/nix-community/emacs-overlay][Emacs overlay's Github repository]]).
 
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (unless IS-NIX-PURE
@@ -495,6 +496,11 @@ Read pdf files in emacs!
       (pdf-loader-install :no-query)))
 #+end_src
 
+** TRAMP
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package tramp)
+#+end_src
+
 ** Languages
 *** Nix
 #+begin_src emacs-lisp :tangle emacs.d/init.el
@@ -509,4 +515,10 @@ Read pdf files in emacs!
     (use-package slime
       :commands slime-mode
       :config (setq inferior-lisp-program "sbcl")))
+#+end_src
+
+*** Web Development & Co
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package js2-mode)
+  (use-package web-mode)
 #+end_src

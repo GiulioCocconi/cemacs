@@ -265,6 +265,8 @@
     :config
     (pdf-loader-install :no-query)))
 
+(use-package tramp)
+
 (when (is-language-active "nix")
   (use-package nix-mode
     :mode "\\.nix\\'"))
@@ -273,3 +275,19 @@
   (use-package slime
     :commands slime-mode
     :config (setq inferior-lisp-program "sbcl")))
+
+(use-package js2-mode)
+(use-package web-mode)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(web-mode js2-mode which-key vertico use-package slime pdf-tools org-appear nix-mode marginalia magit ligature hl-todo highlight-numbers helpful general evil-collection embark-consult doom-themes company-quickhelp all-the-icons-completion winum openwith centaur-tabs)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
