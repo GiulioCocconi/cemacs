@@ -78,6 +78,8 @@ Use a more performant scrolling:
 
 Disable compile warnings:
 #+begin_src emacs-lisp :tangle emacs.d/early-init.el
+  (setq comp-deferred-compilation nil)
+  (setq native-comp-deferred-compilation nil)
   (setq native-comp-async-report-warnings-errors 'silent)
   (setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
 #+end_src
