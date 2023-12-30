@@ -3,11 +3,10 @@
 #+EMAIL: coccogiulio8@gmail.com
 
 #+STARTUP: overview
+#+auto_tangle: t
 
 * TODO
 1. Add mode specific keymaps to General
-2. Check for Windows specific code to be added
-
 * Utils
 Here there are some misc utils (functions or vars).
 #+begin_src emacs-lisp :tangle emacs.d/init.el
@@ -447,9 +446,11 @@ Add evil collection:
 #+end_src
 
 ** Org
+Use org with [[https://orgmode.org/manual/Structure-Templates.html][tempo]]:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package org
     :config
+    (require 'org-tempo)
     (setq org-hide-emphasis-markers t))
 #+end_src
 
@@ -458,16 +459,22 @@ Use ~org-appear~ in order to toggle visibility of hidden elements:
   (use-package org-appear
     :after org
     :hook (org-mode . org-appear-mode))
-
 #+end_src
 
-When saving an org config file Emacs should be asking if tangle.
+Use ~org-modern~ to beautify org documents:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
-  (add-hook 'after-save-hook (lambda ()
-			       (when (and (string-equal (buffer-name) "config.org")
-					  (y-or-n-p "Tangle?"))
-				 (org-babel-tangle))))
+  (use-package org-modern
+    :after org
+    :hook (org-mode . org-modern-mode))
 #+end_src
+
+Use ~org-auto-tangle~ to automatically tangle org files on save:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package org-auto-tangle
+    :after org
+    :hook (org-mode . org-auto-tangle-mode))
+#+end_src
+
 
 ** Magit
 #+begin_src emacs-lisp :tangle emacs.d/init.el
