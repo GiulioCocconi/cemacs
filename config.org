@@ -483,7 +483,6 @@ Use ~org-auto-tangle~ to automatically tangle org files on save:
     :hook (org-mode . org-auto-tangle-mode))
 #+end_src
 
-
 ** Magit
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package magit)
