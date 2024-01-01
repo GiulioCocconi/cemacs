@@ -1,12 +1,2 @@
-elpa/
-transient/
 #!*
-auto-save-list/
-backups/
-eln-cache/
-games/
-recentf/
-savehist/
-eshell/
-org-persist/
-tramp/
+emacs.d/
