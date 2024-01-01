@@ -3,6 +3,7 @@
 #+EMAIL: coccogiulio8@gmail.com
 
 #+STARTUP: overview
+#+PROPERTY: header-args :mkdirp yes
 #+auto_tangle: t
 
 * TODO
