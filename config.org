@@ -357,6 +357,12 @@ Add icons:
     :if (display-graphic-p))
 #+end_src
 
+Show color for hex values [#cc2784]:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package rainbow-mode
+    :hook org-mode prog-mode)
+#+end_src
+
 I'm a confident person:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (fset 'yes-or-no-p 'y-or-n-p)
