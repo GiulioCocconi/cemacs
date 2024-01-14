@@ -443,8 +443,6 @@ Emulate vim bindings in Emacs, set ~evil-want-keybinding~ to ~nil~ for [[https:/
       (evil-set-initial-state (car lst) (cdr lst))))
 #+end_src
 
-
-
 Add evil collection:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package evil-collection
@@ -460,6 +458,23 @@ Use org with [[https://orgmode.org/manual/Structure-Templates.html][tempo]]:
     (require 'org-tempo)
     (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
     (setq org-hide-emphasis-markers t))
+#+end_src
+
+When using ~org-edit-special~ to edit a src block the function ~evil-write~ should return to the main buffer saving changes to region, whilst ~evil-quit~ should abort:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (defun org-src-around (fun-to-call)
+    (apply-partially
+     #'(lambda (fun-to-call fun &rest args)
+	 (if org-src-mode
+	     (funcall fun-to-call)
+	   (apply fun args)))
+     fun-to-call))
+
+  (advice-add 'evil-write
+	      :around (org-src-around #'org-edit-src-exit))
+
+  (advice-add 'evil-quit
+	      :around (org-src-around #'org-edit-src-abort))
 #+end_src
 
 Use ~org-appear~ in order to toggle visibility of hidden elements:
@@ -481,6 +496,12 @@ Use ~org-auto-tangle~ to automatically tangle org files on save:
   (use-package org-auto-tangle
     :after org
     :hook (org-mode . org-auto-tangle-mode))
+#+end_src
+
+Use ~org-reveal~ to create beautiful HTML slides:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package ox-reveal
+    :after org)
 #+end_src
 
 ** Magit
