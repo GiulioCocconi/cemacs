@@ -538,6 +538,14 @@ Read pdf files in emacs!
   (use-package tramp)
 #+end_src
 
+** Direnv
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package direnv
+    :config
+    (direnv-mode)
+    (add-hook 'eshell-directory-change-hook
+	      #'direnv-update-directory-environment))
+#+end_src
 ** Languages
 *** Nix
 #+begin_src emacs-lisp :tangle emacs.d/init.el
