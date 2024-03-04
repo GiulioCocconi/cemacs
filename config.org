@@ -10,34 +10,47 @@
 1. Add mode specific keymaps to General
 * Utils
 Here there are some misc utils (functions or vars).
-#+begin_src emacs-lisp :tangle emacs.d/init.el
-  (defconst IS-MAC      (eq system-type 'darwin))
-  (defconst IS-LINUX    (memq system-type '(gnu gnu/linux gnu/kfreebsd berkeley-unix)))
-  (defconst IS-WINDOWS  (memq system-type '(cygwin windows-nt ms-dos)))
+#+begin_src emacs-lisp :tangle emacs.d/early-init.el
+    (defconst IS-MAC      (eq system-type 'darwin))
+    (defconst IS-LINUX    (memq system-type '(gnu gnu/linux gnu/kfreebsd berkeley-unix)))
+    (defconst IS-WINDOWS  (memq system-type '(cygwin windows-nt ms-dos)))
 
-  (defconst IS-NIX (getenv "NIX_EMACS")
-    "If non-nil then consider emacs as configured by Nix Emacs Overlay")
+    (defconst IS-NIX (getenv "NIX_EMACS")
+      "If non-nil then consider emacs as configured by Nix Emacs Overlay")
 
-  (defvar language-list nil
-    "The list of programming languages supported by this config that are manually managed  (if `IS-NIX' is non-nil then you can, and actually should, manage your programming languages with nix)")
+    (defvar language-list nil
+      "The list of programming languages supported by this config that are manually managed  (if `IS-NIX' is non-nil then you can, and actually should, manage your programming languages with nix)")
 
-  (defvar custom-font-list nil
-    "List of custom fonts to be added to the default font list")
+    (defvar custom-font-list nil
+      "List of custom fonts to be added to the default font list")
 
-  (when IS-NIX
-    (defconst IS-NIX-PURE (getenv "EMACS_PURE")
-      "True if (and only if) using a pure NixOS config"))
+    (when IS-NIX
+      (defconst IS-NIX-PURE (getenv "EMACS_PURE")
+	"True if (and only if) using a pure NixOS config"))
 
-  (defun is-language-active (lang)
-    (or (and IS-NIX
-	     (or (getenv (concat "NIX_LANG_" (upcase lang)))
-		 (string-equal lang "nix")))
-	(member lang language-list)))
+    (defun is-language-active (lang)
+      (or (and IS-NIX
+	       (or (getenv (concat "NIX_LANG_" (upcase lang)))
+		   (string-equal lang "nix")))
+	  (member lang language-list)))
 
-  (defun add-multiple-hooks (hooks fun)
-    "Add function to multiple hooks"
-    (dolist (hook hooks)
-      (add-hook hook fun)))
+    (defun generate-usable-fonts-list (hc-list &optional custom-list)
+      (seq-filter #'(lambda (font-name)
+		      (find-font (font-spec :name font-name)))
+		  (append hc-list
+			  (or custom-list '()))))
+
+    (defun add-multiple-hooks (hooks fun)
+      "Add function to multiple hooks"
+      (dolist (hook hooks)
+	(add-hook hook fun)))
+
+
+    (defun get-vc-root (path)
+      "Get the root of a project managed by a version control"
+      (let ((vc-be (ignore-errors (vc-responsible-backend path))))
+	(if vc-be
+	    (file-truename (vc-call-backend vc-be 'root path)) "")))
 #+end_src
 
 * Startup
@@ -265,24 +278,27 @@ Use ~highlight-numbers~ to highlight numbers literals, enable it in ~prog-mode~.
 #+end_src
 
 ** Fonts & theme
-List of supported fonts:
+
+List of supported monospace fonts:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
-  (defconst USABLE-FONTS
-    (seq-filter #'(lambda (font-name)
-		    (find-font (font-spec :name font-name)))
-		(append '("Iosevka Nerd Font"
-			  "Iosevka NF")
-			custom-font-list)))
+  (defconst USABLE-MONOSPACE-FONTS
+    (generate-usable-fonts-list '("Iosevka Nerd Font"
+				  "Iosevka NF")))
+#+end_src
+
+Set also serif fonts to use with plain-text applications:
+#+begin_src emacs-lisp 
+  (defconst USABLE-SERIF-FONTS
+    (generate-usable-fonts-list '("Cormorant Garamond")))
 #+end_src
 
 Set the default one to be the first of the supported.
 #+begin_src emacs-lisp :tangle emacs.d/init.el
-  (if (null USABLE-FONTS)
+  (if (null USABLE-MONOSPACE-FONTS)
       (display-warning 'font
 		       "No compatible font found, falling back to default!")
-    (set-face-attribute 'default nil :font (car USABLE-FONTS) :height 130))
+    (set-face-attribute 'default nil :font (car USABLE-MONOSPACE-FONTS) :height 130))
 #+end_src
-
 Enable ligatures:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package ligature
@@ -451,6 +467,7 @@ Add evil collection:
 #+end_src
 
 ** Org
+*** Org Packages
 Use org with [[https://orgmode.org/manual/Structure-Templates.html][tempo]]:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package org
@@ -460,22 +477,6 @@ Use org with [[https://orgmode.org/manual/Structure-Templates.html][tempo]]:
     (setq org-hide-emphasis-markers t))
 #+end_src
 
-When using ~org-edit-special~ to edit a src block the function ~evil-write~ should return to the main buffer saving changes to region, whilst ~evil-quit~ should abort:
-#+begin_src emacs-lisp :tangle emacs.d/init.el
-  (defun org-src-around (fun-to-call)
-    (apply-partially
-     #'(lambda (fun-to-call fun &rest args)
-	 (if org-src-mode
-	     (funcall fun-to-call)
-	   (apply fun args)))
-     fun-to-call))
-
-  (advice-add 'evil-write
-	      :around (org-src-around #'org-edit-src-exit))
-
-  (advice-add 'evil-quit
-	      :around (org-src-around #'org-edit-src-abort))
-#+end_src
 
 Use ~org-appear~ in order to toggle visibility of hidden elements:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
@@ -502,6 +503,25 @@ Use ~org-reveal~ to create beautiful HTML slides:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package ox-reveal
     :after org)
+#+end_src
+*** Org Appearence
+
+*** Misc
+When using ~org-edit-special~ in order to edit a src block the function ~evil-write~ should return to the main buffer saving changes to region, whilst ~evil-quit~ should abort:
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (defun org-src-around (fun-to-call)
+    (apply-partially
+     #'(lambda (fun-to-call fun &rest args)
+	 (if org-src-mode
+	     (funcall fun-to-call)
+	   (apply fun args)))
+     fun-to-call))
+
+  (advice-add 'evil-write
+	      :around (org-src-around #'org-edit-src-exit))
+
+  (advice-add 'evil-quit
+	      :around (org-src-around #'org-edit-src-abort))
 #+end_src
 
 ** Magit
