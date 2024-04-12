@@ -11,46 +11,45 @@
 * Utils
 Here there are some misc utils (functions or vars).
 #+begin_src emacs-lisp :tangle emacs.d/early-init.el
-    (defconst IS-MAC      (eq system-type 'darwin))
-    (defconst IS-LINUX    (memq system-type '(gnu gnu/linux gnu/kfreebsd berkeley-unix)))
-    (defconst IS-WINDOWS  (memq system-type '(cygwin windows-nt ms-dos)))
+  (defconst IS-MAC      (eq system-type 'darwin))
+  (defconst IS-LINUX    (memq system-type '(gnu gnu/linux gnu/kfreebsd berkeley-unix)))
+  (defconst IS-WINDOWS  (memq system-type '(cygwin windows-nt ms-dos)))
 
-    (defconst IS-NIX (getenv "NIX_EMACS")
-      "If non-nil then consider emacs as configured by Nix Emacs Overlay")
+  (defconst IS-NIX (getenv "NIX_EMACS")
+    "If non-nil then consider emacs as configured by Nix Emacs Overlay")
 
-    (defvar language-list nil
-      "The list of programming languages supported by this config that are manually managed  (if `IS-NIX' is non-nil then you can, and actually should, manage your programming languages with nix)")
+  (defvar language-list nil
+    "The list of programming languages supported by this config that are manually managed  (if `IS-NIX' is non-nil then you can, and actually should, manage your programming languages with nix)")
 
-    (defvar custom-font-list nil
-      "List of custom fonts to be added to the default font list")
+  (defvar custom-font-list nil
+    "List of custom fonts to be added to the default font list")
 
-    (when IS-NIX
-      (defconst IS-NIX-PURE (getenv "EMACS_PURE")
-	"True if (and only if) using a pure NixOS config"))
+    (defconst IS-NIX-PURE (and IS-NIX (getenv "EMACS_PURE"))
+      "True if (and only if) using a pure NixOS config")
 
-    (defun is-language-active (lang)
-      (or (and IS-NIX
-	       (or (getenv (concat "NIX_LANG_" (upcase lang)))
-		   (string-equal lang "nix")))
-	  (member lang language-list)))
+  (defun is-language-active (lang)
+    (or (and IS-NIX
+	     (or (getenv (concat "NIX_LANG_" (upcase lang)))
+		 (string-equal lang "nix")))
+	(member lang language-list)))
 
-    (defun generate-usable-fonts-list (hc-list &optional custom-list)
-      (seq-filter #'(lambda (font-name)
-		      (find-font (font-spec :name font-name)))
-		  (append hc-list
-			  (or custom-list '()))))
+  (defun generate-usable-fonts-list (hc-list &optional custom-list)
+    (seq-filter #'(lambda (font-name)
+		    (find-font (font-spec :name font-name)))
+		(append hc-list
+			(or custom-list '()))))
 
-    (defun add-multiple-hooks (hooks fun)
-      "Add function to multiple hooks"
-      (dolist (hook hooks)
-	(add-hook hook fun)))
+  (defun add-multiple-hooks (hooks fun)
+    "Add function to multiple hooks"
+    (dolist (hook hooks)
+      (add-hook hook fun)))
 
 
-    (defun get-vc-root (path)
-      "Get the root of a project managed by a version control"
-      (let ((vc-be (ignore-errors (vc-responsible-backend path))))
-	(if vc-be
-	    (file-truename (vc-call-backend vc-be 'root path)) "")))
+  (defun get-vc-root (path)
+    "Get the root of a project managed by a version control"
+    (let ((vc-be (ignore-errors (vc-responsible-backend path))))
+      (if vc-be
+	  (file-truename (vc-call-backend vc-be 'root path)) "")))
 #+end_src
 
 * Startup
@@ -526,7 +525,9 @@ When using ~org-edit-special~ in order to edit a src block the function ~evil-wr
 
 ** Magit
 #+begin_src emacs-lisp :tangle emacs.d/init.el
-  (use-package magit)
+  (unless IS-WINDOWS
+    (use-package magit))
+
 #+end_src
 
 ** Company
