@@ -498,8 +498,10 @@ Use ~org-auto-tangle~ to automatically tangle org files on save:
 
 Use ~org-reveal~ to create beautiful HTML slides:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
-  (use-package ox-reveal
-    :after org)
+    (use-package ox-reveal
+      :after org
+      :config
+      (setq org-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/"))
 #+end_src
 *** Org Appearence
 
