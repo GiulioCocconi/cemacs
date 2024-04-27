@@ -21,7 +21,7 @@ if [ -n "{NIX_EMACS}" ]; then
 	done
     }
 
-    if [[ $1 != "" ]]; then
+    if [[ $1 == "" ]]; then
 	search_for_shell_file "$(pwd)/shell.nix"\
 			      "$(pwd)/default.nix"
 
