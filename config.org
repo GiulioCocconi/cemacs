@@ -523,10 +523,23 @@ When using ~org-edit-special~ in order to edit a src block the function ~evil-wr
 #+end_src
 
 ** Magit
+Enable magit if not using windows
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (unless IS-WINDOWS
-    (use-package magit))
+    (defun magit-commit-around (fun-to-call)
+      (apply-partially
+       #'(lambda (fun-to-call fun &rest args)
+	   (if git-commit-mode
+	       (funcall fun-to-call)
+	     (apply fun args)))
+       fun-to-call))
 
+    (use-package magit
+      :config
+      (advice-add 'evil-write
+		  :around (magit-commit-around #'with-editor-finish))
+      (advice-add 'evil-quit
+		  :around (magit-commit-around #'with-editor-cancel))))
 #+end_src
 
 ** Company
