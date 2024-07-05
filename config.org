@@ -26,8 +26,10 @@ Here there are some misc utils (functions or vars).
 
   (defconst IS-NIX-PURE (and IS-NIX (getenv "EMACS_PURE"))
     "True if (and only if) using a pure NixOS config")
+
   (defun is-language-active (lang)
-    (or (and IS-NIX
+    (or (and IS-NIX (not IS-NIX-PURE))
+	(and IS-NIX
 	     (or (getenv (concat "NIX_LANG_" (upcase lang)))
 		 (string-equal (upcase lang) "NIX")))
 	(member (upcase lang) custom-language-list)))
@@ -526,20 +528,7 @@ When using ~org-edit-special~ in order to edit a src block the function ~evil-wr
 Enable magit if not using windows
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (unless IS-WINDOWS
-    (defun magit-commit-around (fun-to-call)
-      (apply-partially
-       #'(lambda (fun-to-call fun &rest args)
-	   (if git-commit-mode
-	       (funcall fun-to-call)
-	     (apply fun args)))
-       fun-to-call))
-
-    (use-package magit
-      :config
-      (advice-add 'evil-write
-		  :around (magit-commit-around #'with-editor-finish))
-      (advice-add 'evil-quit
-		  :around (magit-commit-around #'with-editor-cancel))))
+    (use-package magit))
 #+end_src
 
 ** Company
@@ -601,6 +590,12 @@ Read pdf files in emacs!
     (use-package slime
       :commands slime-mode
       :config (setq inferior-lisp-program "sbcl")))
+#+end_src
+
+*** Latex
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (when (is-language-active "latex")
+    (use-package auctex))
 #+end_src
 
 *** Web Development & Co
