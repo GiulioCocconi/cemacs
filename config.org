@@ -595,7 +595,8 @@ Read pdf files in emacs!
 *** Latex
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (when (is-language-active "latex")
-    (use-package auctex))
+    (use-package auctex
+      :mode "\\.tex\\"))
 #+end_src
 
 *** Web Development & Co
