@@ -599,6 +599,12 @@ Read pdf files in emacs!
       :mode "\\.tex\\'"))
 #+end_src
 
+*** Haskell
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (when (is-language-active "haskell")
+    (use-package "haskell-mode"
+      :mode "\\.hs\\'"))
+#+end_src
 *** Web Development & Co
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package js2-mode)
