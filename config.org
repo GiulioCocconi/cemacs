@@ -444,6 +444,12 @@ Set handy aliases & functions:
   (use-package embark-consult)
 #+end_src
 
+** Flycheck
+#+begin_src emacs-lisp :tangle emacs.d/init
+  (use-package flycheck
+    :init (global-flycheck-mode))
+#+end_src
+
 ** Evil
 Emulate vim bindings in Emacs, set ~evil-want-keybinding~ to ~nil~ for [[https://github.com/emacs-evil/evil-collection/issues/60][this issue]] and fix the initial state for some /unusual/ modes.
 
@@ -605,6 +611,13 @@ Read pdf files in emacs!
     (use-package "haskell-mode"
       :mode "\\.hs\\'"))
 #+end_src
+*** Python
+#+begin_src emacs-lisp :tangle emacs.d/init.el 
+    (when (is-language-active "python")
+      (use-package elpy)
+      :init (elpy-enable))
+#+end_src
+
 *** Web Development & Co
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package js2-mode)
