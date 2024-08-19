@@ -551,16 +551,6 @@ Enable magit if not using windows
   (use-package helpful)
 #+end_src
 
-** PDF
-Read pdf files in emacs!
-#+begin_src emacs-lisp :tangle emacs.d/init.el
-  (unless IS-WINDOWS
-    (use-package pdf-tools
-      :magic ("%PDF" . pdf-view-mode)
-      :config
-      (pdf-loader-install :no-query)))
-#+end_src
-
 ** TRAMP
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package tramp)
