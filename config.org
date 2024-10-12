@@ -601,6 +601,17 @@ Enable magit if not using windows
     (use-package "haskell-mode"
       :mode "\\.hs\\'"))
 #+end_src
+
+*** Agda
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+    (when (is-language-active "agda")
+      (load-file (let ((coding-system-for-read 'utf-8))
+		   (shell-command-to-string
+		    (if IS-NIX "nix-shell -p agda --quiet --run 'agda-mode locate'"
+		      "agda-mode locate")))))
+
+
+#+end_src
 *** Python
 #+begin_src emacs-lisp :tangle emacs.d/init.el 
     (when (is-language-active "python")
@@ -613,3 +624,4 @@ Enable magit if not using windows
   (use-package js2-mode)
   (use-package web-mode)
 #+end_src
+
