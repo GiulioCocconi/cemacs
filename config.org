@@ -203,7 +203,7 @@ Let's fix that by placing all Backup Files in the temp directory (which is ~/tmp
 #+end_src
 
 ** General
-Use ~SPC~ as leader key (like Spacemacs does) and bind some useful commands.
+Use ~SPC~ as leader key and ~,~ as local leader (like Spacemacs does). Bind some useful commands.
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package general
     :config
@@ -214,6 +214,10 @@ Use ~SPC~ as leader key (like Spacemacs does) and bind some useful commands.
       :prefix "SPC"
       :global-prefix "C-SPC")
 
+    (general-create-definer local-leader-key-definer
+      :keymaps 'normal
+      :prefix ",")
+  
     (leader-key-definer
       "SPC" '(execute-extended-command :which-key "execute command")
       "RET" 'browse-url
@@ -482,19 +486,28 @@ Use org with [[https://orgmode.org/manual/Structure-Templates.html][tempo]]:
     (setq org-hide-emphasis-markers t))
 #+end_src
 
-Use ~org-auto-tangle~ to automatically tangle org files on save:
+Use ~org-auto-tangle~ in order to automatically tangle org files on save:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package org-auto-tangle
     :after org
     :hook (org-mode . org-auto-tangle-mode))
 #+end_src
 
-Use ~org-reveal~ to create beautiful HTML slides:
+Use ~org-reveal~ in order to create beautiful HTML slides:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package ox-reveal
     :after org
     :config
     (setq org-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/"))
+#+end_src
+
+
+Use ~org-latex-preview~ in order to automatically preview latex snips:
+#+begin_src emacs-lisp
+  (use-package latex-preview
+    :after org
+    :ensure t
+    :config (add-hook 'org-mode-hook 'latex-preview-enable))
 #+end_src
 
 *** Org Appearence
