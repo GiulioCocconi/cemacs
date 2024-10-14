@@ -28,7 +28,7 @@ Here there are some misc utils (functions or vars).
     "True if (and only if) using a pure NixOS config")
 
   (defun is-language-active (lang)
-    (or (and IS-NIX (not IS-NIX-PURE))
+    (or (and IS-NIX (not IS-NIX-PURE)) ;; When using an impure config in NixOS all languages are enabled
 	(and IS-NIX
 	     (or (getenv (concat "NIX_LANG_" (upcase lang)))
 		 (string-equal (upcase lang) "NIX")))
@@ -617,14 +617,14 @@ Enable magit if not using windows
 
 *** Agda
 #+begin_src emacs-lisp :tangle emacs.d/init.el
-    (when (is-language-active "agda")
-      (load-file (let ((coding-system-for-read 'utf-8))
-		   (shell-command-to-string
-		    (if IS-NIX "nix-shell -p agda --quiet --run 'agda-mode locate'"
-		      "agda-mode locate")))))
-
-
+  (when (is-language-active "agda")
+    (load-file (let ((coding-system-for-read 'utf-8))
+		 (shell-command-to-string
+		  (if (and IS-NIX (not IS-NIX-PURE))
+		      "nix-shell -p agda --quiet --run 'agda-mode locate'"
+		    "agda-mode locate")))))
 #+end_src
+
 *** Python
 #+begin_src emacs-lisp :tangle emacs.d/init.el 
     (when (is-language-active "python")
