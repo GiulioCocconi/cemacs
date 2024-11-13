@@ -132,6 +132,13 @@ Set ~HOME~ environment variable when on Windows. For a list of Windows environme
     (setenv "HOME" (getenv "USERPROFILE")))
 #+end_src
 
+** Temporary file directory fix
+When running in a ~nix-shell~ environment the tmp directory should be kept as ~/tmp~.
+#+begin_src emacs-lisp :tangle emacs.d/early-init.el
+ (when IS-NIX
+    (setq temporary-file-directory "/tmp/"))
+#+end_src
+
 * Packages setup
 If the config isn't managed by Nix then download Melpa, Elpa and Org archives. If it's using Nix then packages should be managed by emacs-overlay's ~emacsWithPackagesFromUsePackage~ (see [[https://github.com/nix-community/emacs-overlay][Emacs overlay's Github repository]]).
 
@@ -150,7 +157,7 @@ If the config isn't managed by Nix then download Melpa, Elpa and Org archives. I
 
 Ensure that ~use-package~ is actually installed, then require it:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
-  (unless (package-installed-p 'use-package)
+  (unless (or (package-installed-p 'use-package) IS-NIX-PURE)
     (package-install 'use-package))
   (require 'use-package)
 #+end_src
@@ -613,16 +620,6 @@ Enable magit if not using windows
   (when (is-language-active "haskell")
     (use-package "haskell-mode"
       :mode "\\.hs\\'"))
-#+end_src
-
-*** Agda
-#+begin_src emacs-lisp :tangle emacs.d/init.el
-  (when (is-language-active "agda")
-    (load-file (let ((coding-system-for-read 'utf-8))
-		 (shell-command-to-string
-		  (if (and IS-NIX (not IS-NIX-PURE))
-		      "nix-shell -p agda --quiet --run 'agda-mode locate'"
-		    "agda-mode locate")))))
 #+end_src
 
 *** Python
