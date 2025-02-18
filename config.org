@@ -629,6 +629,11 @@ Enable magit if not using windows
       :init (elpy-enable))
 #+end_src
 
+*** Lua
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+    (when (is-language-active "lua")
+      (use-package lua-mode))
+#+end_src
 *** Web Development & Co
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package js2-mode)
