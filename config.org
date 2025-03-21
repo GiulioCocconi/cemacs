@@ -261,9 +261,10 @@ Use relative line numbers:
   (setq display-line-numbers-type 'relative)
 #+end_src
 
-They should be active when in ~prog-mode~:
+Line and column numbers should be active when in ~prog-mode~:
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+  (add-hook 'prog-mode-hook 'column-number-mode)
 #+end_src
 
 ** Tiling WM fix
@@ -640,3 +641,8 @@ Enable magit if not using windows
   (use-package web-mode)
 #+end_src
 
+*** Markdown
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package markdown-mode
+    :mode "\\.md\\'")
+#+end_src
