@@ -587,6 +587,12 @@ Enable magit if not using windows
 #+end_src
 
 ** Languages
+*** LSP
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package lsp-mode
+    :commands lsp)
+#+end_src
+
 *** Nix
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (when (is-language-active "nix")
