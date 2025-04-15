@@ -438,6 +438,16 @@ Set handy aliases & functions:
 #+end_src
 
 * Packages
+** Dirconfig
+#+begin_src emacs-lisp :tangle emacs.d/init.el
+  (use-package dir-config
+    :ensure t
+    :custom
+    (dir-config-file-names '(".dir-config.el"))
+    (dir-config-allowed-directories '("~"))
+    :config
+    (dir-config-mode))
+#+end_src
 ** Vertico, Consult, Marginalia
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package vertico

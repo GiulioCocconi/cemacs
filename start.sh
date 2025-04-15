@@ -8,6 +8,6 @@ if [[ $1 == "--upgrade" ]]; then
 fi
 
 
-[ ! -d ./emacs.d ] && emacs --batch -l org config.org -f org-babel-tangle
+emacs --batch -l org config.org -f org-babel-tangle
 #setsid $EMACS_CMD &
 nix-shell . --run "setsid $EMACS_CMD &"
