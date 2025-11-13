@@ -582,11 +582,6 @@ Enable magit if not using windows
   (use-package helpful)
 #+end_src
 
-** TRAMP
-#+begin_src emacs-lisp :tangle emacs.d/init.el
-  (use-package tramp)
-#+end_src
-
 ** Direnv
 #+begin_src emacs-lisp :tangle emacs.d/init.el
   (use-package direnv
